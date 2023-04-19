@@ -1,6 +1,7 @@
 package stats
 
 import (
+	"CCP_backend/backend/datamodel"
 	"CCP_backend/backend/tool"
 	"fmt"
 	"github.com/gocolly/colly"
@@ -21,8 +22,8 @@ func NewColly(domains ...string) *MyColly {
 	}
 }
 
-func (c *MyColly) CollectInfo() map[string][]int {
-	crawlerResult := make(map[string][]int)
+func (c *MyColly) CollectInfo() []*datamodel.ControlPointInfo {
+	crawlerResultMap := make(map[string][]int)
 	c.Colly.OnRequest(func(request *colly.Request) {
 		//fmt.Printf("Visiting %s\n", request.URL)
 	})
@@ -39,10 +40,10 @@ func (c *MyColly) CollectInfo() map[string][]int {
 			if err != nil {
 				log.Fatal(err)
 			}
-			if _, ok := crawlerResult[controlPoint]; !ok {
-				crawlerResult[controlPoint] = []int{totalArrival}
+			if _, ok := crawlerResultMap[controlPoint]; !ok {
+				crawlerResultMap[controlPoint] = []int{totalArrival}
 			} else {
-				crawlerResult[controlPoint] = append(crawlerResult[controlPoint], totalArrival)
+				crawlerResultMap[controlPoint] = append(crawlerResultMap[controlPoint], totalArrival)
 			}
 		}
 	})
@@ -50,6 +51,15 @@ func (c *MyColly) CollectInfo() map[string][]int {
 	timeSlot := tool.LastThirtyDays()
 	for _, v := range timeSlot {
 		c.Colly.Visit(fmt.Sprintf("https://www.immd.gov.hk/hkt/stat_%s.html", v))
+	}
+	crawlerResult := make([]*datamodel.ControlPointInfo, 0)
+	for k, v := range crawlerResultMap {
+		crawlerResult = append(crawlerResult,
+			&datamodel.ControlPointInfo{
+				ControlPointName: k,
+				ArrivalCount:     v,
+			},
+		)
 	}
 	return crawlerResult
 }
