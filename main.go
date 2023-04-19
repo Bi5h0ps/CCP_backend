@@ -1,19 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"net/http"
+	"CCP_backend/backend"
 )
 
 func main() {
-	fmt.Println("Hello World")
-	router := gin.Default()
-	router.GET("/request", func(context *gin.Context) {
-		context.JSON(http.StatusOK, gin.H{
-			"code": 1,
-			"data": "Hello World",
-		})
-	})
-	router.Run(":8888")
+	server := backend.NewGin()
+	server.Init()
+	server.Start(":9090")
 }
