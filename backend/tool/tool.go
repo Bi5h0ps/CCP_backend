@@ -64,6 +64,12 @@ func StationCodeToName(code string) string {
 		return "Kowloon"
 	case "TUC":
 		return "Tung Chung"
+	case "TUM":
+		return "Tuen Mun"
+	case "WKS":
+		return "Wu Kai Sha"
+	case "TIS":
+		return "Tin Shui Wa"
 	default:
 		return "Unknown"
 	}
