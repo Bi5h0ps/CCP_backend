@@ -94,7 +94,12 @@ func (g *MyGin) registerHandlers() {
 				simplifiedTime := strings.Split(trainSchedule.Time, " ")[1]
 				down.DepartureTimes = append(down.DepartureTimes, simplifiedTime)
 			}
-			result.ScheduleList = []datamodel.Schedule{up, down}
+			if up.DepartureTimes != nil {
+				result.ScheduleList = append(result.ScheduleList, up)
+			}
+			if down.DepartureTimes != nil {
+				result.ScheduleList = append(result.ScheduleList, down)
+			}
 		}
 		context.JSON(200, gin.H{
 			"data": result,
