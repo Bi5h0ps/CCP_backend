@@ -22,8 +22,9 @@ func NewColly(domains ...string) *MyColly {
 	}
 }
 
-func (c *MyColly) CollectInfo() (arrivalCount []*datamodel.ControlPointInfo, dates []string, err error) {
+func (c *MyColly) CollectInfo() (arrivalCount []*datamodel.ControlPointInfo, dates []string, cpNames []string, err error) {
 	crawlerResultMap := make(map[string][]int)
+	cpNameSet := make(map[string]struct{})
 	c.Colly.OnRequest(func(request *colly.Request) {
 		//fmt.Printf("Visiting %s\n", request.URL)
 	})
@@ -35,6 +36,7 @@ func (c *MyColly) CollectInfo() (arrivalCount []*datamodel.ControlPointInfo, dat
 
 	c.Colly.OnHTML("tr", func(element *colly.HTMLElement) {
 		controlPoint := element.DOM.Find("td[headers='Control_Point']").Text()
+		cpNameSet[controlPoint] = struct{}{}
 		totalArrivalString := element.DOM.Find("td[headers='Total_Arrival']").Text()
 		if controlPoint != "" && totalArrivalString != "" {
 			totalArrival, err := strconv.Atoi(strings.ReplaceAll(totalArrivalString, ",", ""))
@@ -62,5 +64,13 @@ func (c *MyColly) CollectInfo() (arrivalCount []*datamodel.ControlPointInfo, dat
 			},
 		)
 	}
-	return crawlerResult, timeSlot, err
+
+	for k, _ := range cpNameSet {
+		if k != "" {
+			cpNames = append(cpNames, k)
+		}
+	}
+	cpNames = tool.SortSlice(cpNames, "總計")
+
+	return crawlerResult, timeSlot, cpNames, err
 }

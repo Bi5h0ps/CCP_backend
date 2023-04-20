@@ -24,16 +24,18 @@ func (g *MyGin) Init() {
 func (g *MyGin) registerHandlers() {
 	g.Engine.GET("/data/arrival", func(context *gin.Context) {
 		c := stats.NewColly("www.immd.gov.hk")
-		data, dates, err := c.CollectInfo()
+		data, dates, controlPoints, err := c.CollectInfo()
 		if err != nil {
 			context.JSON(500, gin.H{
-				"data":  nil,
-				"dates": nil,
+				"data":                nil,
+				"dates":               nil,
+				"control_point_names": nil,
 			})
 		} else {
 			context.JSON(200, gin.H{
-				"data":  data,
-				"dates": dates,
+				"data":                data,
+				"dates":               dates,
+				"control_point_names": controlPoints,
 			})
 		}
 	})

@@ -1,6 +1,9 @@
 package tool
 
-import "time"
+import (
+	"sort"
+	"time"
+)
 
 func LastThirtyDays() (result []string) {
 	// Get the current time
@@ -25,4 +28,18 @@ func LastThirtyDays() (result []string) {
 	}
 
 	return
+}
+
+func SortSlice(slice []string, firstValue string) []string {
+	// sort slice using custom sort function
+	sort.Slice(slice, func(i, j int) bool {
+		if slice[i] == firstValue {
+			return true
+		} else if slice[j] == firstValue {
+			return false
+		} else {
+			return slice[i] < slice[j]
+		}
+	})
+	return slice
 }
