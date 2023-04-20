@@ -43,3 +43,28 @@ func SortSlice(slice []string, firstValue string) []string {
 	})
 	return slice
 }
+
+func StationCodeToName(code string) string {
+	switch code {
+	case "AIR":
+		return "Airport"
+	case "HOK":
+		return "Hong Kong"
+	case "AWE":
+		return "AsiaWorld Expo"
+	case "SHS":
+		return "Sheung Shui"
+	case "LMC":
+		return "Lok Ma Chau"
+	case "LOW":
+		return "Lo Wu"
+	case "ADM":
+		return "Admiralty"
+	case "KOW":
+		return "Kowloon"
+	case "TUC":
+		return "Tung Chung"
+	default:
+		return "Unknown"
+	}
+}
