@@ -5,7 +5,7 @@ import "time"
 func LastThirtyDays() (result []string) {
 	// Get the current time
 	now := time.Now()
-	reversed := make([]string, 31)
+	reversed := make([]string, 0)
 
 	// Loop through the last 30 days
 	for i := 1; i < 31; i++ {

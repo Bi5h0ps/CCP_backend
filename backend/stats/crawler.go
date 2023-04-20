@@ -22,14 +22,15 @@ func NewColly(domains ...string) *MyColly {
 	}
 }
 
-func (c *MyColly) CollectInfo() []*datamodel.ControlPointInfo {
+func (c *MyColly) CollectInfo() (arrivalCount []*datamodel.ControlPointInfo, dates []string, err error) {
 	crawlerResultMap := make(map[string][]int)
 	c.Colly.OnRequest(func(request *colly.Request) {
 		//fmt.Printf("Visiting %s\n", request.URL)
 	})
 
-	c.Colly.OnError(func(response *colly.Response, err error) {
-		fmt.Printf("Error while scraping: %s\n", err.Error())
+	c.Colly.OnError(func(response *colly.Response, scrappingErr error) {
+		fmt.Printf("Error while scrapping: %s\n", err.Error())
+		err = scrappingErr
 	})
 
 	c.Colly.OnHTML("tr", func(element *colly.HTMLElement) {
@@ -61,5 +62,5 @@ func (c *MyColly) CollectInfo() []*datamodel.ControlPointInfo {
 			},
 		)
 	}
-	return crawlerResult
+	return crawlerResult, timeSlot, err
 }
