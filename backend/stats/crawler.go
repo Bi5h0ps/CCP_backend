@@ -70,7 +70,7 @@ func (c *MyColly) CollectInfo() (arrivalCount []*datamodel.ControlPointInfo, dat
 			cpNames = append(cpNames, k)
 		}
 	}
-	cpNames = tool.SortSlice(cpNames, "總計")
+	cpNames = tool.SortSlice(cpNames, "Total")
 
 	return crawlerResult, timeSlot, cpNames, err
 }
