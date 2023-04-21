@@ -53,7 +53,7 @@ func (c *MyColly) CollectInfo() (arrivalCount []*datamodel.ControlPointInfo, dat
 
 	timeSlot := tool.LastThirtyDays()
 	for _, v := range timeSlot {
-		c.Colly.Visit(fmt.Sprintf("https://www.immd.gov.hk/hkt/stat_%s.html", v))
+		c.Colly.Visit(fmt.Sprintf("https://www.immd.gov.hk/eng/stat_%s.html", v))
 	}
 	crawlerResult := make([]*datamodel.ControlPointInfo, 0)
 	for k, v := range crawlerResultMap {
