@@ -105,6 +105,16 @@ func (g *MyGin) registerHandlers() {
 			"data": result,
 		})
 	})
+	g.Engine.GET("/data/shuttle_bus", func(context *gin.Context) {
+		timeTable := stats.Bus()
+		context.JSON(200, gin.H{
+			"Routs":    timeTable.Routes,
+			"HK-Macau": timeTable.HongKongToMacau,
+			"Macau-HK": timeTable.MacauToHongKong,
+			"HK-ZH":    timeTable.HongKongToZhuHai,
+			"ZH-HK":    timeTable.ZhuHaiToHongKong,
+		})
+	})
 }
 
 func (g *MyGin) Start(addr string) (err error) {
