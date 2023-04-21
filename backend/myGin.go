@@ -108,7 +108,7 @@ func (g *MyGin) registerHandlers() {
 	g.Engine.GET("/data/shuttle_bus", func(context *gin.Context) {
 		timeTable := stats.Bus()
 		context.JSON(200, gin.H{
-			"Routs":    timeTable.Routes,
+			"Routes":   timeTable.Routes,
 			"HK-Macau": timeTable.HongKongToMacau,
 			"Macau-HK": timeTable.MacauToHongKong,
 			"HK-ZH":    timeTable.HongKongToZhuHai,
