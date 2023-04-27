@@ -44,6 +44,16 @@ func SortSlice(slice []string, firstValue string) []string {
 	return slice
 }
 
+func GetHongKongMidnight() time.Time {
+	loc, err := time.LoadLocation("Asia/Hong_Kong")
+	if err != nil {
+		panic(err)
+	}
+	now := time.Now().In(loc)
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, loc)
+	return midnight
+}
+
 func StationCodeToName(code string) string {
 	switch code {
 	case "AIR":

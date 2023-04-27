@@ -129,6 +129,6 @@ func (c *MyColly) crawlInfo() (arrivalCount []*datamodel.ControlPointInfo, dates
 	}
 	c.RedisClient.HSet("controlPointsData", "controlPoints", byteControlPoints)
 	c.RedisClient.HSet("controlPointsData", "dates", byteTimeSlot)
-	c.RedisClient.Expire("controlPointsData", 2*time.Minute)
+	c.RedisClient.Expire("controlPointsData", time.Until(tool.GetHongKongMidnight()))
 	return crawlerResult, timeSlot, cpNames, err
 }
