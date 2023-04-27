@@ -3,26 +3,72 @@ package stats
 import (
 	"CCP_backend/backend/datamodel"
 	"CCP_backend/backend/tool"
+	"encoding/json"
 	"fmt"
+	"github.com/go-redis/redis"
 	"github.com/gocolly/colly"
 	"log"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type MyColly struct {
-	Colly *colly.Collector
+	Colly       *colly.Collector
+	RedisClient *redis.Client
 }
 
-func NewColly(domains ...string) *MyColly {
+func NewColly(redisClient *redis.Client, domains ...string) *MyColly {
 	return &MyColly{
 		Colly: colly.NewCollector(
-			colly.AllowedDomains(domains...),
-		),
+			colly.AllowedDomains(domains...)),
+		RedisClient: redisClient,
 	}
 }
 
-func (c *MyColly) CollectInfo() (arrivalCount []*datamodel.ControlPointInfo, dates []string, cpNames []string, err error) {
+func (c *MyColly) GetInfo() (arrivalCount []*datamodel.ControlPointInfo, dates []string, cpNames []string, err error) {
+	val, err := c.RedisClient.HGetAll("controlPoints").Result()
+	if err != nil {
+		return
+	}
+	if val != nil && len(val) != 0 {
+		//if cached, return from cache
+		arrivalCount, dates, cpNames, err = c.retrieveInfo(val)
+		if err != nil {
+			return
+		}
+	}
+	//if cache expired or does not have value set, crawl data from internet
+	return c.crawlInfo()
+}
+
+func (c *MyColly) retrieveInfo(rawData map[string]string) (arrivalCount []*datamodel.ControlPointInfo, dates []string, cpNames []string, err error) {
+	var controlPoints map[string][]int
+	var timeSlots []string
+	err = json.Unmarshal([]byte(rawData["controlPoints"]), &controlPoints)
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal([]byte(rawData["dates"]), &timeSlots)
+	if err != nil {
+		return
+	}
+	for k, v := range controlPoints {
+		cpNames = append(cpNames, k)
+		arrivalCount = append(arrivalCount,
+			&datamodel.ControlPointInfo{
+				ControlPointName: k,
+				ArrivalCount:     v,
+			})
+
+	}
+	for _, v := range timeSlots {
+		dates = append(dates, v)
+	}
+	return
+}
+
+func (c *MyColly) crawlInfo() (arrivalCount []*datamodel.ControlPointInfo, dates []string, cpNames []string, err error) {
 	crawlerResultMap := make(map[string][]int)
 	cpNameSet := make(map[string]struct{})
 	c.Colly.OnRequest(func(request *colly.Request) {
@@ -72,5 +118,17 @@ func (c *MyColly) CollectInfo() (arrivalCount []*datamodel.ControlPointInfo, dat
 	}
 	cpNames = tool.SortSlice(cpNames, "Total")
 
+	//update the cache
+	byteControlPoints, err := json.Marshal(crawlerResult)
+	if err != nil {
+		return
+	}
+	byteTimeSlot, err := json.Marshal(timeSlot)
+	if err != nil {
+		return
+	}
+	c.RedisClient.HSet("controlPointsData", "controlPoints", byteControlPoints)
+	c.RedisClient.HSet("controlPointsData", "dates", byteTimeSlot)
+	c.RedisClient.Expire("controlPointsData", 2*time.Minute)
 	return crawlerResult, timeSlot, cpNames, err
 }

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,11 +15,12 @@ import (
 )
 
 type MyGin struct {
-	Engine *gin.Engine
+	Engine      *gin.Engine
+	RedisClient *redis.Client
 }
 
-func NewGin() *MyGin {
-	return &MyGin{}
+func NewGin(redisClient *redis.Client) *MyGin {
+	return &MyGin{RedisClient: redisClient}
 }
 
 func (g *MyGin) Init() {
@@ -30,8 +32,8 @@ func (g *MyGin) Init() {
 
 func (g *MyGin) registerHandlers() {
 	g.Engine.GET("/data/arrival", func(context *gin.Context) {
-		c := stats.NewColly("www.immd.gov.hk")
-		data, dates, controlPoints, err := c.CollectInfo()
+		c := stats.NewColly(g.RedisClient, "www.immd.gov.hk")
+		data, dates, controlPoints, err := c.GetInfo()
 		if err != nil {
 			context.JSON(500, gin.H{
 				"data":                nil,
